@@ -1,7 +1,9 @@
 import cv2
 import numpy as np
 import glob
-from scipy.cluster import vq
+from scipy.cluster.vq import kmeans,vq, kmeans2
+from hcluster import pdist, linkage, dendrogram
+from pylab import plot,show
 
 path1 = glob.glob('/Users/Maria/Documents/ITandcognition/Github/VIPExam2/101_ObjectCategories/lobster/*.jpg')
 path2 = glob.glob('/Users/Maria/Documents/ITandcognition/Github/VIPExam2/101_ObjectCategories/brontosaurus/*.jpg')
@@ -17,7 +19,7 @@ def detectcompute(data):
 	descriptors = []
 	keypoints =[]
 	for img in data: 
-		image = cv2.imread(img) # in this line the data is lost...
+		image = cv2.imread(img)
 		gray= cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
 		kp, des = sift.detectAndCompute(gray,None)
 		keypoints.append(kp)
@@ -29,15 +31,32 @@ train_kp2, train_des2 = detectcompute(train2)
 
 traindescriptor = train_des1+train_des2
 
-res, idx = vq.kmeans2(traindescriptor,3)
+#getting a np.array of descriptors
+traindescriptor1 = []
+for img in traindescriptor[::20]:
+	for des in img:
+		traindescriptor1.append(des)
+		traindescriptor2 = np.array(traindescriptor1)
 
+#computing K-Means with K = 2 (2 clusters)
+centroids, idx = kmeans2(traindescriptor, 500)
+#assign each sample to a cluster
+#idx,_ = vq(traindescriptor2,centroids)
+print len(centroids)
 
+print idx
+	
 """
-img1 = cv2.imread('/Users/Maria/Documents/ITandcognition/Github/VIPExam2/101_ObjectCategories/lobster/image_0001.jpg')
-gray1= cv2.cvtColor(img1,cv2.COLOR_BGR2GRAY)
-kp1, des1 = sift.detectAndCompute(gray1,None)
 
-img2 = cv2.imread('/Users/Maria/Documents/ITandcognition/Github/VIPExam2/101_ObjectCategories/brontosaurus/image_0001.jpg')
-gray2= cv2.cvtColor(img2,cv2.COLOR_BGR2GRAY)
-kp2, des2 = sift.detectAndCompute(gray2,None)
+# some plotting using numpy's logical indexing
+plot(des[idx==0,0],des[idx==0,1],'ob',
+     des[idx==1,0],des[idx==1,1],'or')
+plot(centroids[:,0],centroids[:,1],'sg',markersize=8)
+show()
+
+
+Y = pdist(traindescriptor1)
+Z = linkage(Y)
+dendrogram(Z)
+
 """
