@@ -15,39 +15,34 @@ test2 = path2[30:]
 
 sift = cv2.SIFT()
 
-def detectcompute(data):
-	descriptors = []
-	keypoints =[]
+def detectcompute(data,x):
+#this function takes data and the class label, x. 
+	x = np.array([x])
 	for img in data: 
 		image = cv2.imread(img)
 		gray= cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
 		kp, des = sift.detectAndCompute(gray,None)
-		keypoints.append(kp)
-		descriptors.append(des)
-	return keypoints, descriptors
+		for d in des:
+			np.insert(d,[0],x) #I'm trying to insert the class label as the first value of every descriptor. 
+			#np.insert(d,slice(0),x)
+	return kp, des
 
-train_kp1, train_des1 = detectcompute(train1)
-train_kp2, train_des2 = detectcompute(train2)
+train_kp1, train_des1 = detectcompute(train1,1)
+train_kp2, train_des2 = detectcompute(train2,2)
 
-traindescriptor = train_des1+train_des2
+print train_kp1[0]
 
-#getting a np.array of descriptors
-traindescriptor1 = []
-for img in traindescriptor[::20]:
-	for des in img:
-		traindescriptor1.append(des)
-		traindescriptor2 = np.array(traindescriptor1)
+print len(train_des1)
+print len(train_des1[0])
 
-#computing K-Means with K = 2 (2 clusters)
-centroids, idx = kmeans2(traindescriptor, 500)
+listofdes = np.concatenate((train_des1, train_des2),axis=0)
+
+#computing K-Means 
+centroids, idx = kmeans2(listofdes, 10)
 #assign each sample to a cluster
 #idx,_ = vq(traindescriptor2,centroids)
-print len(centroids)
-
-print idx
 	
 """
-
 # some plotting using numpy's logical indexing
 plot(des[idx==0,0],des[idx==0,1],'ob',
      des[idx==1,0],des[idx==1,1],'or')
