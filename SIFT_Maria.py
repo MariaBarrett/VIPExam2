@@ -27,7 +27,18 @@ def detectcompute(data):
 	for img in data: 
 		image = cv2.imread(img)
 		gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+<<<<<<< HEAD
 		kp, des = sift.detectAndCompute(gray,None)
+=======
+		des = sift.detectAndCompute(gray,None)
+
+		"""
+		Not really sure why we need this..
+		for d in des:
+			np.insert(d,[0],x_train) #I'm trying to insert the class label as the first value of every descriptor. 
+			#np.insert(d,slice(0),x_train)
+		"""
+>>>>>>> b2faac6be4d80f2e5b1537085fec0be5f95f3bf6
 	return des
 
 
