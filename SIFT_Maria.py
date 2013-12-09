@@ -27,7 +27,7 @@ def detectcompute(data):
 	for img in data: 
 		image = cv2.imread(img)
 		gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-		kp, des = sift.detectAndCompute(gray,None)
+		des = sift.detectAndCompute(gray,None)
 
 		"""
 		Not really sure why we need this..
@@ -38,8 +38,8 @@ def detectcompute(data):
 	return des
 
 
-train_des1 = detectcompute(train1,1)
-train_des2 = detectcompute(train2,2)
+train_des1 = detectcompute(train1)
+train_des2 = detectcompute(train2)
 
 X_train = np.concatenate((train_des1, train_des2),axis=0)
 
