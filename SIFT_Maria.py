@@ -7,16 +7,21 @@ import pylab as pl
 # Extracting test and train set
 path1 = glob.glob('../VIPExam2/101_ObjectCategories/lobster/*.jpg')
 path2 = glob.glob('../VIPExam2/101_ObjectCategories/brontosaurus/*.jpg')
+#RELATIVE PATHS!! ^_^
+
+
 train1 = path1[:30]
 train2 = path2[:30]
-train1.extend(train2)
+train1.extend(train2) #One list only please!
 
 test1 = path1[30:]
 test2 = path2[30:]
 
-
 # Defining classifiers as variables and other useful variables
 sift = cv2.SIFT()
+
+#--------------------------------------------------------------------------
+#Detection
 
 
 """detectcompute(data,x_train)
@@ -34,7 +39,7 @@ def detectcompute(data):
 		kp, des = sift.detectAndCompute(gray,None)
 		descr.append(des)
 	
-	out = np.vstack(descr) #Vertical stacking of our descriptor list
+	out = np.vstack(descr) #Vertical stacking of our descriptor list. Genius function right here.
 	return out
 
 
@@ -49,7 +54,6 @@ def singledetect(data):
 	for i in range(len(data)):
 		des = detectcompute[i]
 
-
 	return 
 
 ### We compute the SIFT descriptors for our entire training set at once and run kmeans on it
@@ -62,4 +66,11 @@ codebook,distortion = kmeans(whiten(X_train),5)
 #### We then compute the SIFT descriptors for every image seperately
 #### as to get every images bag of w~erds
 idx,distor = vq(X_train,codebook)
-imagefile
+
+
+
+#--------------------------------------------------------------------------
+#Indexing
+
+def index(data,label): #Python does not like when you use already defined names such as "class" or "def" to create new variables.
+	"Beautiful function goes here?"
