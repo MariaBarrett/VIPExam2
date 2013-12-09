@@ -7,11 +7,6 @@ import pylab as pl
 # Extracting test and train set
 path1 = glob.glob('../VIPExam2/101_ObjectCategories/lobster/*.jpg')
 path2 = glob.glob('../VIPExam2/101_ObjectCategories/brontosaurus/*.jpg')
-<<<<<<< HEAD
-=======
-#RELATIVE PATHS!! ^_^
-
->>>>>>> 4f96f9389f0a381d58ae3f49574041ee33ad8d8d
 
 train1 = path1[:30]
 train2 = path2[:30]
@@ -76,17 +71,10 @@ codebook,distortion = kmeans(whiten(X_train),5)
 #### We then compute the SIFT descriptors for every image seperately
 #### as to get every images bag of w~erds
 idx,distor = vq(X_train,codebook)
-<<<<<<< HEAD
-#print idx
-=======
-
-
->>>>>>> 4f96f9389f0a381d58ae3f49574041ee33ad8d8d
 
 #--------------------------------------------------------------------------
 #Indexing
 
-<<<<<<< HEAD
 def index(data,x):
 #x is the class 
 	indexlist = []
@@ -112,7 +100,4 @@ def index(data,x):
 
 index(train1,2)
 	
-=======
-def index(data,label): #Python does not like when you use already defined names such as "class" or "def" to create new variables.
-	"Beautiful function goes here?"
->>>>>>> 4f96f9389f0a381d58ae3f49574041ee33ad8d8d
+
