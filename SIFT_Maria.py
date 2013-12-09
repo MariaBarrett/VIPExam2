@@ -1,3 +1,4 @@
+from __future__ import division
 import cv2
 import numpy as np
 import glob
@@ -20,13 +21,6 @@ sift = cv2.SIFT()
 
 #--------------------------------------------------------------------------
 #Detection
-
-
-"""detectcompute(data,x_train)
-This function takes data and the class label x_train.
-It then calculates the SIFT descriptors for every image and returns all image descriptors as rows in a single array.
-
-"""
 
 def detectcompute(data):
 	descr = []
@@ -76,7 +70,8 @@ idx,distor = vq(X_train,codebook)
 #Indexing
 
 def index(data,x):
-#x is the class 
+#x is the class. This function returns a list of lists of lists. The structure is as follows:
+#[class, filename, [index of first descriptor, [first descriptor], [index of second decriptor [second descriptor]]]]  
 	indexlist = []
 	temp = []
 	temp2 = []
@@ -92,8 +87,10 @@ def index(data,x):
 		for i in range(len(des)):
 			temp2.append(idx[i])
 			temp2.append(des[i])
-		temp.append(temp2) 
+		temp.append(temp2)
+		temp2 =[] 
 	indexlist.append(temp)
+	temp=[]
 	print indexlist[0][0] #print class of first image
 	print indexlist[0]
 
