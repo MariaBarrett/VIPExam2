@@ -20,7 +20,7 @@ test2 = path2[30:]
 
 # Defining classifiers as variables and other useful variables
 sift = cv2.SIFT()
-
+clu = 5
 #--------------------------------------------------------------------------
 #Detection
 
@@ -65,19 +65,21 @@ def singledetect(data):
 		image = cv2.imread(data[i])
 		gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
 		kp, des = sift.detectAndCompute(gray,None)
-		sd.append((data[i],des))
+		sd.append([data[i],des])
 
 	return sd
 
 
 
-"""bow(list of images,codebook)
-This function taskes a list of image paths and a codebook as input.
-It then outputs each image's bag of words() --> Consider normalizing (frequency)) together with the image path.
+"""bow(list of images,codebook,clusters)
+This function taskes a list of image paths, a codebook and an integer denoting the amount of clusters as input.
+It then computes each image's bag of words as a normalized histogram in a pseudo-dictionary.
+It then outputs 
 """
 
-def bow(images,codebook):
+def bow(images,codebook,clusters):
 	out = images
+	temp = []
 
 	for im in images:
 		c = Counter()
@@ -86,9 +88,19 @@ def bow(images,codebook):
 		for word in bag:
 			c[word]+=1
 
-		print c
-		# TODO: The actual bow with (count of class)/(total amount of descriptors) and append it to a list
+		#Creating normalized histogram
+		for i in range(clusters):
+			if i in c.iterkeys():
+				c[i] = c[i]/len(codebook)
+			if i not in c.iterkeys():
+				c[i] = 0
+		temp.append(c)
 		
+	for i in range(len(temp)):
+		out[i].append(temp[i])
+
+	print out #For you Maria, so you can see the structure!
+	return out
 
 
 
@@ -96,13 +108,14 @@ def bow(images,codebook):
 X_train = detectcompute(train1)
 
 #computing K-Means 
-codebook,distortion = kmeans(whiten(X_train),5)
+codebook,distortion = kmeans(whiten(X_train),clu)
 
 
 #### We then compute the SIFT descriptors for every image seperately as to get every images bag of words
 imtrain = singledetect(train1) #[image1[path,descriptors array].image2[path,descriptors array] etc.]
 
-bow(imtrain,codebook)
+#Pseudo database with list structure
+Pdatabase = bow(imtrain,codebook,clu)
 #idx,distor = vq(X_train,codebook)
 
 #--------------------------------------------------------------------------
@@ -130,8 +143,8 @@ def index(data,x):
 		temp2 =[] 
 	indexlist.append(temp)
 	temp=[]
-	print indexlist[0][0] #print class of first image
-	print indexlist[0]
+	#print indexlist[0][0] #print class of first image
+	#print indexlist[0]
 
 
 index(train1,2)
