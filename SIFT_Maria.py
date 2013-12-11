@@ -127,9 +127,9 @@ Pdatabase = bow(imtrain,codebook,k)
 
 print "Converting the database into a HTML file"
 
-htmltable = open("table.htm","r+") 
+htmltable = open("table.html","r+") 
 
-begin = "<htm><body><table cellpadding=5><tr><th>Filename</th><th>Histogram</th></tr>"
+begin = "<html><body><table cellpadding=5><tr><th>Filename</th><th>Histogram</th></tr>"
 htmltable.write(begin)
 
 for i in range(len(Pdatabase)):
@@ -140,5 +140,4 @@ end = "</table></body></html>"
 htmltable.write(end)
 
 print "Done"
-
 htmltable.close() 
