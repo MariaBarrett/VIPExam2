@@ -7,6 +7,10 @@ import pylab as pl
 from collections import Counter
 
 # Extracting test and train set
+print "=" * 60
+print "Initializing the script"
+print "-"*60
+print "Loading images."
 path1 = glob.glob('../VIPExam2/101_ObjectCategories/lobster/*.jpg')
 path2 = glob.glob('../VIPExam2/101_ObjectCategories/brontosaurus/*.jpg')
 #RELATIVE PATHS!! ^_^
@@ -17,10 +21,11 @@ train1.extend(train2) #One list only please!
 
 test1 = path1[30:]
 test2 = path2[30:]
+print "Done."
 
 # Defining classifiers as variables and other useful variables
 sift = cv2.SIFT()
-clu = 5
+k = 10
 #--------------------------------------------------------------------------
 #Detection
 
@@ -34,6 +39,8 @@ It then calculates the SIFT descriptors for the entire data input and returns al
 def detectcompute(data):
 	descr = []
 
+	print "Locating all SIFT descriptors for the train set."
+
 	for i in range(len(data)): 
 		image = cv2.imread(data[i])
 		gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
@@ -41,6 +48,7 @@ def detectcompute(data):
 		descr.append(des)
 	
 	out = np.vstack(descr) #Vertical stacking of our descriptor list. Genius function right here.
+	print "Done."
 	return out
 
 
@@ -52,6 +60,7 @@ It then outputs each images' path and corresponding SIFT descriptors.
 
 def singledetect(data):
 	sd = []
+	print "Locating and assigning SIFT descriptors for each image"
 
 	for i in range(len(data)): 
 		image = cv2.imread(data[i])
@@ -59,6 +68,7 @@ def singledetect(data):
 		kp, des = sift.detectAndCompute(gray,None)
 		sd.append([data[i],des])
 
+	print "Done."
 	return sd
 
 
@@ -73,6 +83,8 @@ def bow(images,codebook,clusters):
 	out = images
 	temp = []
 
+	print "-"*60
+	print "Creating the pseudo database."
 	for im in images:
 		c = Counter()
 		bag,dist = vq(whiten(im[1]),codebook)
@@ -80,10 +92,8 @@ def bow(images,codebook,clusters):
 		for word in bag:
 			c[word]+=1
 
-		#Creating normalized histogram
+		#Creating histograms
 		for i in range(clusters):
-			if i in c.iterkeys():
-				c[i] = c[i]/len(codebook)
 			if i not in c.iterkeys():
 				c[i] = 0
 		temp.append(c)
@@ -91,28 +101,31 @@ def bow(images,codebook,clusters):
 	for i in range(len(temp)):
 		out[i].append(temp[i])
 
-	#print out #For you Maria, so you can see the structure!
+	print "Done."
 	return out
 
 
 
 ### We compute the SIFT descriptors for our entire training set at once and run kmeans on it
+
 X_train = detectcompute(train1)
 
+print "-"*60
+print "Clustering the data with K-means"
 #computing K-Means 
-codebook,distortion = kmeans(whiten(X_train),clu)
+codebook,distortion = kmeans(whiten(X_train),k)
 
 
 #### We then compute the SIFT descriptors for every image seperately as to get every images bag of words
-imtrain = singledetect(train1) #[image1[path,descriptors array].image2[path,descriptors array] etc.]
+imtrain = singledetect(train1)
 
 #Pseudo database with list structure
-Pdatabase = bow(imtrain,codebook,clu)
-#idx,distor = vq(X_train,codebook)
-
+Pdatabase = bow(imtrain,codebook,k)
 
 #--------------------------------------------------------------------------
 #Print in table
+
+print "Converting the database into a HTML file"
 
 htmltable = open("table.htm","r+") 
 
@@ -123,8 +136,9 @@ for i in range(len(Pdatabase)):
     middle = "<tr><td>%(filename)s</td><td>%(histogram)s</td></tr>" % {"filename": Pdatabase[i][0], "histogram": Pdatabase[i][-1]}
     htmltable.write(middle)
 
-end = "</table></body></html>"    
+end = "</table></body></html>"    	
 htmltable.write(end)
 
+print "Done"
 
 htmltable.close() 
