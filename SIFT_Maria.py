@@ -126,5 +126,4 @@ for i in range(len(Pdatabase)):
 end = "</table></body></html>"    
 htmltable.write(end)
 
-
 htmltable.close() 
