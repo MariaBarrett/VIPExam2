@@ -10,8 +10,13 @@ from PIL import Image
 from collections import Counter
 
 # Extracting test and train set
-path1 = glob.glob('101_ObjectCategories\lobster\*.jpg')
-path2 = glob.glob('101_ObjectCategories\brontosaurus\*.jpg')
+#windows
+#path1 = glob.glob('101_ObjectCategories\lobster\*.jpg')
+#path2 = glob.glob('101_ObjectCategories\brontosaurus\*.jpg')
+
+#unix
+path1 = glob.glob('101_ObjectCategories/lobster/*.jpg')
+path2 = glob.glob('101_ObjectCategories/brontosaurus/*.jpg')
 #RELATIVE PATHS!! ^_^
 
 train1 = path1[:30]
@@ -139,7 +144,7 @@ querybow = bow(query, codebook,clu)
 queryimage=querybow[random.randint(0,len(test1)-1)]
 print queryimage[0]
 print '+++++++++++++++++++++++='
-# caculate the Bhattacharyya disctance between query image and the images in database and output the first 30 matched images
+# calculate the Bhattacharyya disctance between query image and the images in database and output the first 30 matched images
 def Bhattacharyya(queryimage,Pdatabase):
     count=[]
 
