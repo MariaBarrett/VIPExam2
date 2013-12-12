@@ -155,7 +155,9 @@ querybow = bow(query, codebook,clu)
 # create the bag of visual words for the query image
 # query image is created randomly
 queryimage=querybow[random.randint(0,len(test1)-1)]
-print queryimage[0]
+#print queryimage[0]
+#print queryimage[2][0]
+print Pdatabase[0][2][0]
 print '+++++++++++++++++++++++='
 # calculate the Bhattacharyya disctance between query image and the images in database and output the first 30 matched images
 def Bhattacharyya(queryimage,Pdatabase):
@@ -164,15 +166,16 @@ def Bhattacharyya(queryimage,Pdatabase):
     amount=0
     for num in range(len(Pdatabase)):
         for i in range(clu):
-           amount+=sqrt(queryimage[2][i]*Pdatabase[num][2][i])
+           amount+=sqrt(queryimage[2][i]*Pdatabase[num][2][i]) # You seem to loop over the dictionary. But the order of the dictionary is a bit unstable and not the same for all images. It's safer to acces dict data by the key 
         count.append(amount)
+        print len(count)
         amount=0
         
-    for key in range(len(count)-1):
+    for key in range(len(count)-1): #
         for x in range(len(count)-key-1):
             if count[x]>count[x+1]:
                 count[x],count[x+1]=count[x+1],count[x]
-                Pdatabase[x],Pdatabase[x+1]=Pdatabase[x+1],Pdatabase[x]
+                Pdatabase[x],Pdatabase[x+1]=Pdatabase[x+1],Pdatabase[x] #is this some fancy sorting again?
                 
     queryresult=[]
     for j in range(30):

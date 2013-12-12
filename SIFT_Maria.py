@@ -139,5 +139,5 @@ for i in range(len(Pdatabase)):
 end = "</table></body></html>"    	
 htmltable.write(end)
 
-print "Done"
-htmltable.close() 
+print "Done" 
+htmltable.close()
