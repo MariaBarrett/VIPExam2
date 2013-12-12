@@ -8,7 +8,8 @@ import random
 from math import *
 from PIL import Image
 from collections import Counter
-from bs4 import BeautifulSoup # guys you need to install this. pip install beautifulsoup4 did it for me
+from bs4 import BeautifulSoup # guys you need to install this. sudo pip install beautifulsoup4 did it for me
+import ast # sudo pip install ast
 
 # Extracting test and train set
 #windows
@@ -143,7 +144,7 @@ soup = BeautifulSoup(database)
 table = soup.find('table')
 filename = table.find('td', text='101_ObjectCategories/lobster/image_0004.jpg') #here I guess you want to insert a variable containing the filename
 td = filename.findNext('td')
-histogram_of_filename = td.text
+histogram_of_filename = ast.literal_eval(td.text[7:]) # using ast to turn the unicode string back into a dictionary
 
 #----------------------------------------------------------------------------
 
