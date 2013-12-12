@@ -139,13 +139,12 @@ htmltable.close()
 #------------------------------------------------------------
 #Retrieving from database
 
-database = open("table.htm","r") 
-soup = BeautifulSoup(database)
-table = soup.find('table')
+htmldoc = open("table.htm","r") 
+database = BeautifulSoup(htmldoc)
+table = database.find('table')
 filename = table.find('td', text='101_ObjectCategories/lobster/image_0004.jpg') #here I guess you want to insert a variable containing the filename
-td = filename.findNext('td')
-histogram_of_filename = ast.literal_eval(td.text[7:]) # using ast to turn the unicode string back into a dictionary
-
+td = filename.findNext('td') #next td contains the histogram for the specified image
+histogram_from_db = ast.literal_eval(td.text[7:]) # using ast to turn the unicode string back into a dictionary
 #----------------------------------------------------------------------------
 
 #Retrieval
