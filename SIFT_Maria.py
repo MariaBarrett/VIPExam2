@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from collections import Counter
 from scipy.cluster.vq import kmeans,vq,whiten
 from PIL import Image
+from operator import itemgetter
 import cv2
 import numpy as np
 import glob
@@ -17,8 +18,8 @@ import pickle
 print "=" * 60
 print "Initializing the script.\n"
 
-path1 = glob.glob('../VIPExam2/101_ObjectCategories/lobster/*.jpg')
-path2 = glob.glob('../VIPExam2/101_ObjectCategories/brontosaurus/*.jpg')
+path1 = glob.glob('../*/101_ObjectCategories/lobster/*.jpg')
+path2 = glob.glob('../*/101_ObjectCategories/brontosaurus/*.jpg')
 
 train1 = path1[:30]
 train2 = path2[:30]
@@ -29,7 +30,7 @@ test2 = path2
 test1.extend(test2)
 # Defining classifiers as variables and other useful variables
 sift = cv2.SIFT()
-k = 5
+k = 10
 
 #--------------------------------------------------------------------------
 #Detection and bag of visual words
@@ -187,9 +188,11 @@ def from_database():
 	htmldoc = open("table.htm","r") 
 	db = BeautifulSoup(htmldoc)
 	table = db.find('table')
-	for i in range(60):
+	rows = db.findAll('tr')
+	
+	for row in rows[1:]:
 		temp = []
-		filename = table.find('td')
+		filename = row.find('td') 
 		temp.append(filename.text)
 		hist = filename.findNext('td') 
 		temp.append(ast.literal_eval(hist.text[7:]))
@@ -202,21 +205,44 @@ def from_database():
 #--------------------------------------------------------------------------
 #Retrieval measures
 
+"""userretrieval()
+
+"""
+def userretrieval():
+	print "\nTo create a query, please select a value ranging from 0-85\n"
+	print "Lobster images are located between 0-41"
+	print "Brontosaurus images are located between 42-83"
+	print "-"*45,"\n"
+	uquery = int(raw_input("Choose an image: "))
+
+	if uquery < 0 or uquery > 83:
+		print "Invalid input. Please try again"
+		query = int(raw_input("Choose an image: "))
+
+	db = from_database()
+	im = db[uquery]
+	print len(db)
+	bhat = Bhattacharyya(im,db)
+	present_results(im,bhat,"Bhattacharyya")
+
+	freq = commonwords(im,db)
+	present_results(im,freq,"Common Words")
+
 
 """Bhattacharyya(one query image, a database)
 This function takes a single image and an image database as its input.
 It then tries to match the image with every image in the database by measuring the Bhattacharyyan distance between them.
 It then returns the 9 closests matches.
 """
-def Bhattacharyya(queryimage,Pdatabase):
+def Bhattacharyya(queryimage,db):
     count=[]
 
     amount=0
-    for num in range(len(Pdatabase)):
+    for num in range(len(db)):
         for i in range(k):
-           amount+=sqrt(queryimage[2][i]*Pdatabase[num][1][i]) # You seem to loop over the dictionaries. But the order of the dictionary is a bit unstable and not the same for all images. It's safer to acces dict data by the key 
-       	# I know my math is not the best, but how does it make sense to sum up all values of sqrt(queryimage historgram * Pdatabase histogram) into one value per Pdatabase image and not use information about which keys(clusternumbers) have which values(which is counts, not probablities but  guess you know that?)?
-        count.append([amount,Pdatabase[num][0]])
+           amount+=sqrt(queryimage[1][i]*db[num][1][i]) # You seem to loop over the dictionaries. But the order of the dictionary is a bit unstable and not the same for all images. It's safer to acces dict data by the key 
+       	# I know my math is not the best, but how does it make sense to sum up all values of sqrt(queryimage historgram * db histogram) into one value per db image and not use information about which keys(clusternumbers) have which values(which is counts, not probablities but  guess you know that?)?
+        count.append([amount,db[num][0]])
         amount=0
 
     Result=sorted(count,key=itemgetter(0),reverse = False)
@@ -228,7 +254,10 @@ def Bhattacharyya(queryimage,Pdatabase):
     return queryresult
 
 
+"""tfidf(an image,database)
 
+
+"""
 def tfidf(queryimage,db):
 
     print "-"*60
@@ -262,18 +291,33 @@ def tfidf(queryimage,db):
     Result = sorted(tfidf, key=itemgetter(0))#Sort the images in the database according to the tf-idf value
     
     for i in range(len(Result)):
-        print Result[i][1]
         queryresult.append(Result[i][1])
 
     return queryresult
 
- """
- present_results(queryimage, resultpath similarityfunction)
+def commonwords(queryimage,db):
+    Common=[]
+    queryresult=[]
+    for num in range(len(db)):
+        count=0
+        for i in range(k):
+           if queryimage[1][i]!= 0 and db[num][1][i]!= 0:
+                count+=1
+        Common.append([count,db[num][0]])#Caculate the amount of common words and append the result to the list named Common
+    Result=sorted(Common,key=itemgetter(0))#Sort the images according to the amount the common words
+                      
+    for j in range(len(Result)):
+        queryresult.append(Result[j][1])
+
+    return queryresult
+
+"""
+ present_results(queryimage, resultpath, similarityfunction)
  This function takes the queryimage, the list of filenames for the 9 best matched images and the name of the similarity function
  It prints the precision rate and plots the queryimage and the matched images
- """   
-
-def = present_results(queryimage, resultpath, similarityfunction)
+"""   
+def present_results(queryimage, resultpath, similarityfunction):
+	counter = 0
 	l = queryimage[0].find("lobster")
 	b = queryimage[0].find("brontosaurus")
 
@@ -282,12 +326,12 @@ def = present_results(queryimage, resultpath, similarityfunction)
 	else:
 		label = "lobster"
 
-	for r in resultpath:
+	for r in resultpath[:9]:
 		if r.find(label) > 0:
 			counter +=1
-		result = counter / len(resultpath)
+			result = counter / len(resultpath[:9])
 
-	print ('Result for %s \n' %imagepath)
+	print ('Result for %s \n' %queryimage[0])
 	print ('%s:' % similarityfunction)
 	print ('Precision rate in top 9: %s' %result)
 
@@ -299,18 +343,22 @@ def = present_results(queryimage, resultpath, similarityfunction)
 
 	#plot the query image
 	pl.imshow(np.array(Image.open(queryimage[0])))
+	pl.axis('off')
 	pl.show()
+
 
 	#plot the matched images
 	for i in range(9):
 	    pl.subplot(331+i)
 	    pl.imshow(imageplot[i])
+	    pl.title('%s' % i)
 	    pl.axis('off')
-	    pl.title('9 best matched images of %s' % queryimage)
+
+	pl.suptitle('9 best of %(sim)s on %(label)s' % {'sim':similarityfunction,'label': label})
 
 	pl.show()
 	pl.close()
-"""
+
 
 
 #--------------------------------------------------------------------------
@@ -350,6 +398,7 @@ def commands(cmd):
 		userinput()
 
 	elif cmd == "2":
+		userretrieval()
 		print "A retrieval has been made."
 		userinput()
 
@@ -369,40 +418,3 @@ def main():
 
 if __name__ =='__main__':
     main(); 
-
-"""
-print "="*60
-print "Retrieving matches in our database for a random image"
-
-query = singledetect(test1)
-querybow = bow(query, codebook_from_db,k)
-
-
-# create the bag of visual words for the query image
-# query image is created randomly
-queryimage=querybow[random.randint(0,len(test1)-1)]
-
-resultpath = Bhattacharyya(queryimage, database)
-
-print "Done."
-print "-"*60
-print "Plotting the results."
-
-imageplot=[]#used to store the matched images
-
-for result in resultpath:
-    img=np.array(Image.open(result))
-    imageplot.append(img)
-
-#plot the query image
-pl.imshow(np.array(Image.open(queryimage[0])))
-
-#plot the matched images
-for i in range(9):
-    pl.subplot(331+i)
-    pl.imshow(imageplot[i])
-    pl.axis('off')
-
-pl.show()
-pl.close()
-"""
