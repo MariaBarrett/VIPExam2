@@ -30,10 +30,9 @@ test1.extend(test2)
 # Defining classifiers as variables and other useful variables
 sift = cv2.SIFT()
 k = 5
+
 #--------------------------------------------------------------------------
-#Detection
-
-
+#Detection and bag of visual words
 
 """detectcompute(data)
 This function takes a list of image paths as input.
@@ -76,6 +75,44 @@ def singledetect(data):
 
 
 
+"""bow(list of images,codebook,clusters)
+This function taskes a list of image paths, a codebook and an integer denoting the amount of clusters as input.
+It then computes each image's bag of words as a normalized histogram in a pseudo-dictionary.
+It then outputs the image path, their descriptors and their normalized histogram.
+"""
+def bow(images,codebook,clusters):
+	out = images
+	temp = []
+
+	print "-"*60
+	print "Creating the pseudo database."
+	for im in images:
+		c = Counter()
+		bag,dist = vq(whiten(im[1]),codebook)
+		
+		for word in bag:
+			c[word]+=1
+
+		#Creating histograms
+		for i in range(clusters):
+			if i in c.iterkeys():
+				c[i] = c[i]/sum(c.values())
+			if i not in c.iterkeys():
+				c[i] = 0
+		
+		temp.append(c)
+		
+	for i in range(len(temp)):
+		out[i].append(temp[i])
+
+	print "Done.\n"
+	return out
+
+
+
+#--------------------------------------------------------------------------
+#Creating database and writing to files
+
 """createdatabase()
 This function takes no direct input, but utilizes the image paths assigned at the beginning of the script.
 It then computes the K-means clustering on the specified training set and calculates vector quantization on every images descriptor up against the clusters.
@@ -109,39 +146,6 @@ def createdatabase():
 
 	codebook_to_file(codebook)
 
-
-"""bow(list of images,codebook,clusters)
-This function taskes a list of image paths, a codebook and an integer denoting the amount of clusters as input.
-It then computes each image's bag of words as a normalized histogram in a pseudo-dictionary.
-It then outputs 
-"""
-def bow(images,codebook,clusters):
-	out = images
-	temp = []
-
-	print "-"*60
-	print "Creating the pseudo database."
-	for im in images:
-		c = Counter()
-		bag,dist = vq(whiten(im[1]),codebook)
-		
-		for word in bag:
-			c[word]+=1
-
-		#Creating histograms
-		for i in range(clusters):
-			if i in c.iterkeys():
-				c[i] = c[i]/sum(c.values())
-			if i not in c.iterkeys():
-				c[i] = 0
-		
-		temp.append(c)
-		
-	for i in range(len(temp)):
-		out[i].append(temp[i])
-
-	print "Done.\n"
-	return out
 
 
 """
@@ -195,6 +199,9 @@ def from_database():
 	return database
 
 
+#--------------------------------------------------------------------------
+#Retrieval measures
+
 
 """Bhattacharyya(one query image, a database)
 This function takes a single image and an image database as its input.
@@ -219,8 +226,6 @@ def Bhattacharyya(queryimage,Pdatabase):
         queryresult.append(Result[j][1])#input the path to queryrsult
 
     return queryresult
-
-
 
 
 
@@ -263,6 +268,8 @@ def tfidf(queryimage,db):
     return queryresult
 
 
+#--------------------------------------------------------------------------
+#Interface
 
 """userinput()
 This function is called at the beginning and takes a user input.
@@ -315,16 +322,9 @@ def main():
     userinput();
 
 
-
-
-#----------------------------------------------------------------------------
-
-#Retrieval
-#database = from_database()
-
-#This should be at the bottom, but since we still need to convert retrieval into functions this will serve as the bottom.
 if __name__ =='__main__':
     main(); 
+
 """
 print "="*60
 print "Retrieving matches in our database for a random image"
