@@ -191,13 +191,21 @@ print "Done."
 #------------------------------------------------------------
 #Retrieving from database
 """
-htmldoc = open("table.htm","r") 
-database = BeautifulSoup(htmldoc)
-table = database.find('table')
-filename = table.find('td', text='VIPExam2/101_ObjectCategories/lobster/image_0004.jpg') #here I guess you want to insert a variable containing the filename
-td = filename.findNext('td') #next td contains the histogram for the specified image
-histogram_from_db = ast.literal_eval(td.text[7:]) # using ast to turn the unicode string back into a dictionary
+from_database(path_to_db, filename)
+This function takes a filename and retrieves the histogram from the database, which is an html-doc containing a table.
+It searches for the filename and returns the content of the next cell, which contains the histogram.
+It returns the histogram (minus the first characters which is just the text "Counter") transformed from unicode string back to a dictionary.
+
 """
+def from_database(filename):
+	htmldoc = open("table.htm","r") 
+	database = BeautifulSoup(htmldoc)
+	table = database.find('table')
+	filename = table.find('td', text=filename) 
+	td = filename.findNext('td') 
+	histogram_from_db = ast.literal_eval(td.text[7:]) 
+	return histogram_from_db
+
 #----------------------------------------------------------------------------
 
 #Retrieval
