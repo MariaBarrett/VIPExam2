@@ -164,16 +164,16 @@ def Bhattacharyya(queryimage,Pdatabase):
     amount=0
     for num in range(len(Pdatabase)):
         for i in range(clu):
-           amount+=sqrt(queryimage[2][i]*Pdatabase[num][2][i]) # You seem to loop over the dictionary. But the order of the dictionary is a bit unstable and not the same for all images. It's safer to acces dict data by the key 
+           amount+=sqrt(queryimage[2][i]*Pdatabase[num][2][i]) # You seem to loop over the dictionaries. But the order of the dictionary is a bit unstable and not the same for all images. It's safer to acces dict data by the key 
+       	# I know my math is not the best, but how does it make sense to sum up all values of sqrt(queryimage historgram * Pdatabase histogram) into one value per Pdatabase image and not use information about which keys(clusternumbers) have which values(which is counts, not probablities but  guess you know that?)?
         count.append(amount)
-        print len(count)
         amount=0
         
-    for key in range(len(count)-1): #
+    for key in range(len(count)-1): 
         for x in range(len(count)-key-1):
             if count[x]>count[x+1]:
                 count[x],count[x+1]=count[x+1],count[x]
-                Pdatabase[x],Pdatabase[x+1]=Pdatabase[x+1],Pdatabase[x] #is this some fancy sorting again?
+                Pdatabase[x],Pdatabase[x+1]=Pdatabase[x+1],Pdatabase[x] #some fancy sorting again ;-)
                 
     queryresult=[]
     for j in range(30):
