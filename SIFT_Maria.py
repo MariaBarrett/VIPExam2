@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 from collections import Counter
 from scipy.cluster.vq import kmeans,vq,whiten
 from PIL import Image
-
 import cv2
 import numpy as np
 import glob
@@ -12,16 +11,11 @@ import pylab as pl
 import ast
 import random
 
-
-
-# Extracting test and train set
 print "=" * 60
 print "Initializing the script"
-print "-"*60
-print "Loading images."
+
 path1 = glob.glob('../VIPExam2/101_ObjectCategories/lobster/*.jpg')
 path2 = glob.glob('../VIPExam2/101_ObjectCategories/brontosaurus/*.jpg')
-#RELATIVE PATHS!! ^_^
 
 train1 = path1[:30]
 train2 = path2[:30]
@@ -30,8 +24,6 @@ train1.extend(train2) #One list only please!
 test1 = path1
 test2 = path2
 test1.extend(test2)
-print "Done."
-
 # Defining classifiers as variables and other useful variables
 sift = cv2.SIFT()
 k = 500
@@ -80,6 +72,35 @@ def singledetect(data):
 	print "Done."
 	return sd
 
+
+"""
+
+
+"""
+
+def createdatabase():
+	X_train = detectcompute(train1)
+	print "-"*60
+	print "Clustering the data with K-means"
+	codebook,distortion = kmeans(whiten(X_train),k)
+	imtrain = singledetect(test1)
+	Pdatabase = bow(imtrain,codebook,k) #Pseudo database with list structure
+	print "Done."
+
+	#Writing to html.table
+	print "Converting the database into a HTML file"
+	htmltable = open("table.htm","r+") 
+	begin = "<htm><body><table cellpadding=5><tr><th>Filename</th><th>Histogram</th></tr>"
+	htmltable.write(begin)
+
+	for i in range(len(Pdatabase)):
+	    middle = "<tr><td>%(filename)s</td><td>%(histogram)s</td></tr>" % {"filename": Pdatabase[i][0], "histogram": Pdatabase[i][-1]}
+	    htmltable.write(middle)
+
+	end = "</table></body></html>"    
+	htmltable.write(end)
+	htmltable.close()
+	print "Done."
 
 
 """bow(list of images,codebook,clusters)
@@ -151,8 +172,66 @@ def Bhattacharyya(queryimage,db):
     return queryresult
 
 
-### We compute the SIFT descriptors for our entire training set at once and run kmeans on it
+"""userinput()
+This function 
 
+
+"""
+
+def userinput():
+	print "="*60
+	print "Please select one of the following 3 options. \n"
+	print "-"*45
+	print "1. Compute the database."
+	print "2. Retrieve an image."
+	print "3. Exit"
+	print "-"*45
+	usercmd = raw_input("Choose an option: ")
+	commands(usercmd)
+
+
+
+"""
+
+
+"""
+
+def commands(cmd):
+	legal = ["1","2","3"]
+
+	if cmd not in legal:
+		print "Invalid input. Please use the numerical value.\n"
+		userinput()
+
+	elif cmd == "1":
+		createdatabase()
+		print "A database has been created. \n" 
+		userinput()
+
+	elif cmd == "2":
+		#Retrieve function
+		print "A retrieval has been made."
+		userinput()
+
+	elif cmd == "3":
+		print "Quit succesfully."
+		raise SystemExit()
+
+
+
+"""main()
+Starts the programme by calling the userinput-function
+"""
+def main():
+    print ">>> Content Based Image Retrieval by Maria, Guangliang and Alexander \n Vision and Image Processing assignment 2 \n";
+    userinput();
+
+if __name__ =='__main__':
+    main(); 
+
+
+### We compute the SIFT descriptors for our entire training set at once and run kmeans on it
+"""
 X_train = detectcompute(train1)
 
 print "-"*60
@@ -188,6 +267,7 @@ htmltable.close()
 
 print "Done." 
 
+"""
 #------------------------------------------------------------
 #Retrieving from database
 """
