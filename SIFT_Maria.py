@@ -10,6 +10,9 @@ import glob
 import pylab as pl
 import ast
 import random
+import pickle
+
+# Extracting test and train set
 
 print "=" * 60
 print "Initializing the script.\n"
@@ -88,6 +91,7 @@ def createdatabase():
 	imtrain = singledetect(test1)
 	Pdatabase = bow(imtrain,codebook,k) #Pseudo database with list structure
 
+
 	#Writing to html.table
 	print "Converting the database into a HTML file"
 	htmltable = open("table.htm","r+") 
@@ -102,6 +106,8 @@ def createdatabase():
 	htmltable.write(end)
 	htmltable.close()
 	print "Done.\n"
+
+	codebook_to_file(codebook)
 
 
 """bow(list of images,codebook,clusters)
@@ -138,6 +144,57 @@ def bow(images,codebook,clusters):
 	return out
 
 
+"""
+codebook_to_file()
+This function saves the codebook to a file.
+"""
+def codebook_to_file(codebook):
+	print "Saving codebook to file"
+	codebookfile = open("codebook.txt", "r+")
+	pickle.dump(codebook, codebookfile)
+	
+	codebookfile.close()
+	print "Done.\n"
+
+
+
+"""
+codebook_from_file()
+This function retrieves the codebook from the file.
+It returns the codebook,
+"""
+
+def codebook_from_file():
+	from_db = open("codebook.txt", "r")
+	codebook_from_db = pickle.load(from_db)
+
+	from_db.close()
+	return codebook_from_db
+
+
+
+"""
+from_database(path_to_db, filename)
+This function retrieves and returns everything from our database: filenames and the adjacent histogram.
+These are structured in a nested list like this: [[filename, hisogram],[filename,histogram]...]
+"""
+def from_database():
+	database =[]
+	htmldoc = open("table.htm","r") 
+	db = BeautifulSoup(htmldoc)
+	table = db.find('table')
+	for i in range(60):
+		temp = []
+		filename = table.find('td')
+		temp.append(filename.text)
+		hist = filename.findNext('td') 
+		temp.append(ast.literal_eval(hist.text[7:]))
+		database.append(temp)
+
+	htmldoc.close()
+	return database
+
+
 
 """Bhattacharyya(one query image, a database)
 This function takes a single image and an image database as its input.
@@ -152,7 +209,7 @@ def Bhattacharyya(queryimage,db):
 
     for num in range(len(db)):
         for i in range(k):
-           amount+=sqrt(queryimage[2][i]*db[num][2][i]) 
+           amount+=sqrt(queryimage[2][i]*db[num][1][i]) 
         count.append(amount)
         amount=0
         
@@ -205,7 +262,6 @@ def commands(cmd):
 		userinput()
 
 	elif cmd == "2":
-		#Retrieve function
 		print "A retrieval has been made."
 		userinput()
 
@@ -223,40 +279,29 @@ def main():
     userinput();
 
 
-#------------------------------------------------------------
-#Retrieving from database
-"""from_database(path_to_db, filename)
-This function takes a filename and retrieves the histogram from the database, which is an html-doc containing a table.
-It searches for the filename and returns the content of the next cell, which contains the histogram.
-It returns the histogram (minus the first characters which is just the text "Counter") transformed from unicode string back to a dictionary.
-"""
-def from_database(filename):
-	htmldoc = open("table.htm","r") 
-	database = BeautifulSoup(htmldoc)
-	table = database.find('table')
-	filename = table.find('td', text=filename) 
-	td = filename.findNext('td') 
-	histogram_from_db = ast.literal_eval(td.text[7:]) 
-	return histogram_from_db
+
 
 #----------------------------------------------------------------------------
 
 #Retrieval
+#database = from_database()
 
 #This should be at the bottom, but since we still need to convert retrieval into functions this will serve as the bottom.
 if __name__ =='__main__':
     main(); 
-
+"""
 print "="*60
 print "Retrieving matches in our database for a random image"
 
 query = singledetect(test1)
-querybow = bow(query, codebook,k)
+querybow = bow(query, codebook_from_db,k)
+
 
 # create the bag of visual words for the query image
 # query image is created randomly
 queryimage=querybow[random.randint(0,len(test1)-1)]
-resultpath = Bhattacharyya(queryimage, Pdatabase)
+
+resultpath = Bhattacharyya(queryimage, database)
 
 print "Done."
 print "-"*60
@@ -279,3 +324,4 @@ for i in range(9):
 
 pl.show()
 pl.close()
+"""
