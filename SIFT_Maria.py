@@ -201,29 +201,65 @@ This function takes a single image and an image database as its input.
 It then tries to match the image with every image in the database by measuring the Bhattacharyyan distance between them.
 It then returns the 9 closests matches.
 """
-def Bhattacharyya(queryimage,db):
+def Bhattacharyya(queryimage,Pdatabase):
     count=[]
+
     amount=0
-
-    print "Calculating the Bhattacharyya distance."
-
-    for num in range(len(db)):
-        for i in range(k):
-           amount+=sqrt(queryimage[2][i]*db[num][1][i]) 
-        count.append(amount)
+    for num in range(len(Pdatabase)):
+        for i in range(clu):
+           amount+=sqrt(queryimage[2][i]*Pdatabase[num][2][i]) # You seem to loop over the dictionaries. But the order of the dictionary is a bit unstable and not the same for all images. It's safer to acces dict data by the key 
+       	# I know my math is not the best, but how does it make sense to sum up all values of sqrt(queryimage historgram * Pdatabase histogram) into one value per Pdatabase image and not use information about which keys(clusternumbers) have which values(which is counts, not probablities but  guess you know that?)?
+        count.append([amount,Pdatabase[num][0]])
         amount=0
-        
-    for key in range(len(count)-1):
-        for x in range(len(count)-key-1):
-            if count[x]>count[x+1]:
-                count[x],count[x+1]=count[x+1],count[x]
-                db[x],db[x+1]=db[x+1],db[x]
-                
-    queryresult=[]
-    for j in range(9):
-        queryresult.append(db[j][0])
 
-    print "Done.\n"
+    Result=sorted(count,key=itemgetter(0),reverse = False)
+                     
+    queryresult=[]
+    for j in range(len(Result)):
+        queryresult.append(Result[j][1])#input the path to queryrsult
+
+    return queryresult
+
+
+
+
+
+def tfidf(queryimage,db):
+
+    print "-"*60
+    print "Calculating the tf-idf."
+
+    tfidf=[]
+    queryresult=[]
+    for num in range(len(db)):
+            
+       tf=[]
+       idf=[]
+       words_amount=0
+       file_amount=0
+       tfidfvalue=0
+      
+       for i in range(clu):
+           words_amount+=db[num][2][i]
+          
+       for j in range(clu):
+           tf.append(db[num][2][j]/words_amount)
+           for n in range(len(db)):
+              if db[n][2][j]!=0: file_amount+=1
+           idf.append(log(len(db)/(1+file_amount)))
+          
+       for x in range(len(tf)):
+           tfidfvalue+=tf[x]*idf[x]
+         
+       
+       tfidf.append([tfidfvalue,db[num][0]])
+        
+    Result = sorted(tfidf, key=itemgetter(0))
+    
+    for i in range(len(Result)):
+        print Result[i][1]
+        queryresult.append(Result[i][1])
+
     return queryresult
 
 
