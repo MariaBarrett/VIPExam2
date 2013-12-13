@@ -350,8 +350,9 @@ def present_results(queryimage, resultpath, similarityfunction):
 	#plot the matched images
 	for i in range(9):
 	    pl.subplot(331+i)
+	    show = i+1
 	    pl.imshow(imageplot[i])
-	    pl.title('%s' % i)
+	    pl.title('%s' % show)
 	    pl.axis('off')
 
 	pl.suptitle('9 best of %(sim)s on %(label)s' % {'sim':similarityfunction,'label': label})
