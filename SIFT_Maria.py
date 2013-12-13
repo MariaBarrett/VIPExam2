@@ -267,6 +267,51 @@ def tfidf(queryimage,db):
 
     return queryresult
 
+ """
+ present_results(queryimage, resultpath similarityfunction)
+ This function takes the queryimage, the list of filenames for the 9 best matched images and the name of the similarity function
+ It prints the precision rate and plots the queryimage and the matched images
+ """   
+
+def = present_results(queryimage, resultpath, similarityfunction)
+	l = queryimage[0].find("lobster")
+	b = queryimage[0].find("brontosaurus")
+
+	if l < 0: 
+		label = "brontosaurus"
+	else:
+		label = "lobster"
+
+	for r in resultpath:
+		if r.find(label) > 0:
+			counter +=1
+		result = counter / len(resultpath)
+
+	print ('Result for %s \n' %imagepath)
+	print ('%s:' % similarityfunction)
+	print ('Precision rate in top 9: %s' %result)
+
+	imageplot=[]#used to store the matched images
+
+	for result in resultpath:
+	    img=np.array(Image.open(result))
+	    imageplot.append(img)
+
+	#plot the query image
+	pl.imshow(np.array(Image.open(queryimage[0])))
+	pl.show()
+
+	#plot the matched images
+	for i in range(9):
+	    pl.subplot(331+i)
+	    pl.imshow(imageplot[i])
+	    pl.axis('off')
+	    pl.title('9 best matched images of %s' % queryimage)
+
+	pl.show()
+	pl.close()
+"""
+
 
 #--------------------------------------------------------------------------
 #Interface
