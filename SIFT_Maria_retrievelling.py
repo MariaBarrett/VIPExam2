@@ -1,15 +1,14 @@
-from __future__ import division
 import cv2
 import numpy as np
 import glob
-from scipy.cluster.vq import kmeans,vq,whiten
+import ast
 import pylab as pl
-import random
+from __future__ import division
 from math import *
 from PIL import Image
 from collections import Counter
-from bs4 import BeautifulSoup # guys you need to install this. sudo pip install beautifulsoup4 did it for me
-import ast # sudo pip install ast
+from bs4 import BeautifulSoup
+from scipy.cluster.vq import kmeans,vq,whiten
 
 # Extracting test and train set
 #windows
@@ -155,9 +154,8 @@ querybow = bow(query, codebook,clu)
 # create the bag of visual words for the query image
 # query image is created randomly
 queryimage=querybow[random.randint(0,len(test1)-1)]
-#print queryimage[0]
-#print queryimage[2][0]
-print Pdatabase[0][2][0]
+
+print Pdatabase[0][2][1]
 print '+++++++++++++++++++++++='
 # calculate the Bhattacharyya disctance between query image and the images in database and output the first 30 matched images
 def Bhattacharyya(queryimage,Pdatabase):
@@ -196,8 +194,8 @@ for result in resultpath:
 pl.imshow(np.array(Image.open(queryimage[0])))
 
 #plot the matched images
-for i in range(30):
-    pl.subplot(651+i)
+for i in range(9):
+    pl.subplot(331+i)
     pl.imshow(imageplot[i])
     pl.axis('off')
 
