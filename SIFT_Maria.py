@@ -234,19 +234,30 @@ if __name__ =='__main__':
 
 #------------------------------------------------------------
 #Print codebook to file
-print "Saving codebook to file"
-codebookfile = open("codebook.txt", "r+")
-pickle.dump(codebook, codebookfile)
-
-codebookfile.close()
-print "Done"
+"""
+codebook_to_file()
+This function saves the codebook to a file.
+"""
+def codebook_to_file():
+	print "Saving codebook to file"
+	codebookfile = open("codebook.txt", "r+")
+	pickle.dump(codebook, codebookfile)
+	codebookfile.close()
+	print "Done"
 
 #___________________________________________________________
 #Retrieving codebook from db
+"""
+codebook_from_file()
+This function retrieves the codebook from the file.
+It returns the codebook,
+"""
 
-from_db = open("codebook.txt", "r")
-codebook_from_db = pickle.load(from_db)
-from_db.close()
+def codebook_from_file():
+	from_db = open("codebook.txt", "r")
+	codebook_from_db = pickle.load(from_db)
+	from_db.close()
+	return codebook_from_db
 
 
 #------------------------------------------------------------
