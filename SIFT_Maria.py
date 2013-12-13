@@ -206,8 +206,8 @@ def Bhattacharyya(queryimage,Pdatabase):
 
     amount=0
     for num in range(len(Pdatabase)):
-        for i in range(clu):
-           amount+=sqrt(queryimage[2][i]*Pdatabase[num][2][i]) # You seem to loop over the dictionaries. But the order of the dictionary is a bit unstable and not the same for all images. It's safer to acces dict data by the key 
+        for i in range(k):
+           amount+=sqrt(queryimage[1][i]*Pdatabase[num][1][i]) # You seem to loop over the dictionaries. But the order of the dictionary is a bit unstable and not the same for all images. It's safer to acces dict data by the key 
        	# I know my math is not the best, but how does it make sense to sum up all values of sqrt(queryimage historgram * Pdatabase histogram) into one value per Pdatabase image and not use information about which keys(clusternumbers) have which values(which is counts, not probablities but  guess you know that?)?
         count.append([amount,Pdatabase[num][0]])
         amount=0
@@ -239,22 +239,22 @@ def tfidf(queryimage,db):
        file_amount=0
        tfidfvalue=0
       
-       for i in range(clu):
-           words_amount+=db[num][2][i]
+       for i in range(k):#Caculate the amount of words in an image(from database)
+           words_amount+=db[num][1][i]
           
-       for j in range(clu):
-           tf.append(db[num][2][j]/words_amount)
+       for j in range(k):
+           tf.append(db[num][1][j]/words_amount)#Caculate tf, and append tf to the list named tf
            for n in range(len(db)):
-              if db[n][2][j]!=0: file_amount+=1
-           idf.append(log(len(db)/(1+file_amount)))
+              if db[n][1][j]!=0: file_amount+=1
+           idf.append(log(len(db)/(1+file_amount)))#Caculate idf, and append idf to the list named idf
           
        for x in range(len(tf)):
-           tfidfvalue+=tf[x]*idf[x]
+           tfidfvalue+=tf[x]*idf[x]#Caculate the tf-idf
          
        
        tfidf.append([tfidfvalue,db[num][0]])
         
-    Result = sorted(tfidf, key=itemgetter(0))
+    Result = sorted(tfidf, key=itemgetter(0))#Sort the images in the database according to the tf-idf value
     
     for i in range(len(Result)):
         print Result[i][1]
