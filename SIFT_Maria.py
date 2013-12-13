@@ -10,13 +10,10 @@ import glob
 import pylab as pl
 import ast
 import random
-<<<<<<< HEAD
 import pickle
 
 # Extracting test and train set
-=======
 
->>>>>>> 89dbde6d96e26b4c510ed0cdf8af9afe80aeac97
 print "=" * 60
 print "Initializing the script"
 
@@ -235,43 +232,6 @@ if __name__ =='__main__':
     main(); 
 
 
-### We compute the SIFT descriptors for our entire training set at once and run kmeans on it
-"""
-X_train = detectcompute(train1)
-
-print "-"*60
-print "Clustering the data with K-means"
-#computing K-Means 
-codebook,distortion = kmeans(whiten(X_train),k)
-
-#### We then compute the SIFT descriptors for every image seperately as to get every images bag of words
-imtrain = singledetect(test1)
-
-#Pseudo database with list structure
-Pdatabase = bow(imtrain,codebook,k)
-
-#--------------------------------------------------------------------------
-#Print to database file
-
-print "Converting the database into a HTML file"
-
-htmltable = open("table.htm","r+") 
-
-begin = "<htm><body><table cellpadding=5><tr><th>Filename</th><th>Histogram</th></tr>"
-htmltable.write(begin)
-
-for i in range(len(Pdatabase)):
-    middle = "<tr><td>%(filename)s</td><td>%(histogram)s</td></tr>" % {"filename": Pdatabase[i][0], "histogram": Pdatabase[i][-1]}
-    htmltable.write(middle)
-
-end = "</table></body></html>"    
-htmltable.write(end)
-
-htmltable.close()
-
-print "Done." 
-
-"""
 #------------------------------------------------------------
 #Print codebook to file
 print "Saving codebook to file"
