@@ -12,7 +12,7 @@ import ast
 import random
 
 print "=" * 60
-print "Initializing the script"
+print "Initializing the script.\n"
 
 path1 = glob.glob('../VIPExam2/101_ObjectCategories/lobster/*.jpg')
 path2 = glob.glob('../VIPExam2/101_ObjectCategories/brontosaurus/*.jpg')
@@ -26,20 +26,20 @@ test2 = path2
 test1.extend(test2)
 # Defining classifiers as variables and other useful variables
 sift = cv2.SIFT()
-k = 500
+k = 5
 #--------------------------------------------------------------------------
 #Detection
+
 
 
 """detectcompute(data)
 This function takes a list of image paths as input.
 It then calculates the SIFT descriptors for the entire data input and returns all descriptors as rows in a single array.
-
 """
-
 def detectcompute(data):
 	descr = []
 
+	print "="*60,"\n"
 	print "Locating all SIFT descriptors for the train set."
 
 	for i in range(len(data)): 
@@ -49,16 +49,15 @@ def detectcompute(data):
 		descr.append(des)
 	
 	out = np.vstack(descr) #Vertical stacking of our descriptor list. Genius function right here.
-	print "Done."
+	print "Done.\n"
 	return out
+
 
 
 """singledetect(data)
 This function takes a list of image paths as inputs.
 It then outputs each images' path and corresponding SIFT descriptors.
-
 """
-
 def singledetect(data):
 	sd = []
 	print "Locating and assigning SIFT descriptors for each image"
@@ -69,23 +68,25 @@ def singledetect(data):
 		kp, des = sift.detectAndCompute(gray,None)
 		sd.append([data[i],des])
 
-	print "Done."
+	print "Done.\n"
 	return sd
 
 
+
+"""createdatabase()
+This function takes no direct input, but utilizes the image paths assigned at the beginning of the script.
+It then computes the K-means clustering on the specified training set and calculates vector quantization on every images descriptor up against the clusters.
+It then calls the Bag-of-Visual-Words function. Finally it outputs every image's path and normalized histogram into one file, and the codebook into another file.
 """
-
-
-"""
-
 def createdatabase():
 	X_train = detectcompute(train1)
-	print "-"*60
+
 	print "Clustering the data with K-means"
 	codebook,distortion = kmeans(whiten(X_train),k)
+	print "Done.\n"
+	
 	imtrain = singledetect(test1)
 	Pdatabase = bow(imtrain,codebook,k) #Pseudo database with list structure
-	print "Done."
 
 	#Writing to html.table
 	print "Converting the database into a HTML file"
@@ -100,7 +101,7 @@ def createdatabase():
 	end = "</table></body></html>"    
 	htmltable.write(end)
 	htmltable.close()
-	print "Done."
+	print "Done.\n"
 
 
 """bow(list of images,codebook,clusters)
@@ -108,7 +109,6 @@ This function taskes a list of image paths, a codebook and an integer denoting t
 It then computes each image's bag of words as a normalized histogram in a pseudo-dictionary.
 It then outputs 
 """
-
 def bow(images,codebook,clusters):
 	out = images
 	temp = []
@@ -134,7 +134,7 @@ def bow(images,codebook,clusters):
 	for i in range(len(temp)):
 		out[i].append(temp[i])
 
-	print "Done."
+	print "Done.\n"
 	return out
 
 
@@ -143,13 +143,11 @@ def bow(images,codebook,clusters):
 This function takes a single image and an image database as its input.
 It then tries to match the image with every image in the database by measuring the Bhattacharyyan distance between them.
 It then returns the 9 closests matches.
-
 """
 def Bhattacharyya(queryimage,db):
     count=[]
     amount=0
 
-    print "-"*60
     print "Calculating the Bhattacharyya distance."
 
     for num in range(len(db)):
@@ -158,26 +156,25 @@ def Bhattacharyya(queryimage,db):
         count.append(amount)
         amount=0
         
-    for key in range(len(count)-1): #
+    for key in range(len(count)-1):
         for x in range(len(count)-key-1):
             if count[x]>count[x+1]:
                 count[x],count[x+1]=count[x+1],count[x]
-                db[x],db[x+1]=db[x+1],db[x] #is this some fancy sorting again? Yes it is, and why are we using it again? Bubble sort performs worse than .sorted()
+                db[x],db[x+1]=db[x+1],db[x]
                 
     queryresult=[]
     for j in range(9):
         queryresult.append(db[j][0])
 
-    print "Done."
+    print "Done.\n"
     return queryresult
 
 
+
 """userinput()
-This function 
-
-
+This function is called at the beginning and takes a user input.
+The input is then used as an ouput to call the commands(cmd) function.
 """
-
 def userinput():
 	print "="*60
 	print "Please select one of the following 3 options. \n"
@@ -191,11 +188,10 @@ def userinput():
 
 
 
+"""commands(cmd)
+This function takes an input of 
+
 """
-
-
-"""
-
 def commands(cmd):
 	legal = ["1","2","3"]
 
@@ -226,56 +222,13 @@ def main():
     print ">>> Content Based Image Retrieval by Maria, Guangliang and Alexander \n Vision and Image Processing assignment 2 \n";
     userinput();
 
-if __name__ =='__main__':
-    main(); 
 
-
-### We compute the SIFT descriptors for our entire training set at once and run kmeans on it
-"""
-X_train = detectcompute(train1)
-
-print "-"*60
-print "Clustering the data with K-means"
-#computing K-Means 
-codebook,distortion = kmeans(whiten(X_train),k)
-
-
-#### We then compute the SIFT descriptors for every image seperately as to get every images bag of words
-imtrain = singledetect(test1)
-
-#Pseudo database with list structure
-Pdatabase = bow(imtrain,codebook,k)
-
-#--------------------------------------------------------------------------
-#Print in table
-
-print "Converting the database into a HTML file"
-
-htmltable = open("table.htm","r+") 
-
-begin = "<htm><body><table cellpadding=5><tr><th>Filename</th><th>Histogram</th></tr>"
-htmltable.write(begin)
-
-for i in range(len(Pdatabase)):
-    middle = "<tr><td>%(filename)s</td><td>%(histogram)s</td></tr>" % {"filename": Pdatabase[i][0], "histogram": Pdatabase[i][-1]}
-    htmltable.write(middle)
-
-end = "</table></body></html>"    
-htmltable.write(end)
-
-htmltable.close()
-
-print "Done." 
-
-"""
 #------------------------------------------------------------
 #Retrieving from database
-"""
-from_database(path_to_db, filename)
+"""from_database(path_to_db, filename)
 This function takes a filename and retrieves the histogram from the database, which is an html-doc containing a table.
 It searches for the filename and returns the content of the next cell, which contains the histogram.
 It returns the histogram (minus the first characters which is just the text "Counter") transformed from unicode string back to a dictionary.
-
 """
 def from_database(filename):
 	htmldoc = open("table.htm","r") 
@@ -289,6 +242,10 @@ def from_database(filename):
 #----------------------------------------------------------------------------
 
 #Retrieval
+
+#This should be at the bottom, but since we still need to convert retrieval into functions this will serve as the bottom.
+if __name__ =='__main__':
+    main(); 
 
 print "="*60
 print "Retrieving matches in our database for a random image"
