@@ -11,8 +11,7 @@ import glob
 import pylab as pl
 import ast
 import random
-
-
+import pickle
 
 # Extracting test and train set
 print "=" * 60
@@ -34,7 +33,7 @@ print "Done."
 
 # Defining classifiers as variables and other useful variables
 sift = cv2.SIFT()
-k = 500
+k = 2
 #--------------------------------------------------------------------------
 #Detection
 
@@ -117,7 +116,6 @@ def bow(images,codebook,clusters):
 	return out
 
 
-
 """Bhattacharyya(one query image, a database)
 This function takes a single image and an image database as its input.
 It then tries to match the image with every image in the database by measuring the Bhattacharyyan distance between them.
@@ -133,7 +131,7 @@ def Bhattacharyya(queryimage,db):
 
     for num in range(len(db)):
         for i in range(k):
-           amount+=sqrt(queryimage[2][i]*db[num][2][i]) 
+           amount+=sqrt(queryimage[2][i]*db[num][1][i]) 
         count.append(amount)
         amount=0
         
@@ -160,7 +158,6 @@ print "Clustering the data with K-means"
 #computing K-Means 
 codebook,distortion = kmeans(whiten(X_train),k)
 
-
 #### We then compute the SIFT descriptors for every image seperately as to get every images bag of words
 imtrain = singledetect(test1)
 
@@ -168,7 +165,7 @@ imtrain = singledetect(test1)
 Pdatabase = bow(imtrain,codebook,k)
 
 #--------------------------------------------------------------------------
-#Print in table
+#Print to database file
 
 print "Converting the database into a HTML file"
 
@@ -189,37 +186,60 @@ htmltable.close()
 print "Done." 
 
 #------------------------------------------------------------
+#Print codebook to file
+print "Saving codebook to file"
+codebookfile = open("codebook.txt", "r+")
+pickle.dump(codebook, codebookfile)
+
+codebookfile.close()
+print "Done"
+
+#___________________________________________________________
+#Retrieving codebook from db
+
+from_db = open("codebook.txt", "r")
+codebook_from_db = pickle.load(from_db)
+from_db.close()
+
+
+#------------------------------------------------------------
 #Retrieving from database
 """
 from_database(path_to_db, filename)
-This function takes a filename and retrieves the histogram from the database, which is an html-doc containing a table.
-It searches for the filename and returns the content of the next cell, which contains the histogram.
-It returns the histogram (minus the first characters which is just the text "Counter") transformed from unicode string back to a dictionary.
-
+This function retrieves and returns everything from our database: filenames and the adjacent histogram.
+These are structured in a nested list like this: [[filename, hisogram],[filename,histogram]...]
 """
-def from_database(filename):
+def from_database():
+	database =[]
 	htmldoc = open("table.htm","r") 
-	database = BeautifulSoup(htmldoc)
-	table = database.find('table')
-	filename = table.find('td', text=filename) 
-	td = filename.findNext('td') 
-	histogram_from_db = ast.literal_eval(td.text[7:]) 
-	return histogram_from_db
+	db = BeautifulSoup(htmldoc)
+	table = db.find('table')
+	for i in range(60):
+		temp = []
+		filename = table.find('td')
+		temp.append(filename.text)
+		hist = filename.findNext('td') 
+		temp.append(ast.literal_eval(hist.text[7:]))
+		database.append(temp)
+	return database
 
 #----------------------------------------------------------------------------
 
 #Retrieval
+database = from_database()
 
 print "="*60
 print "Retrieving matches in our database for a random image"
 
 query = singledetect(test1)
-querybow = bow(query, codebook,k)
+querybow = bow(query, codebook_from_db,k)
+
 
 # create the bag of visual words for the query image
 # query image is created randomly
 queryimage=querybow[random.randint(0,len(test1)-1)]
-resultpath = Bhattacharyya(queryimage, Pdatabase)
+
+resultpath = Bhattacharyya(queryimage, database)
 
 print "Done."
 print "-"*60
