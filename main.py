@@ -30,7 +30,7 @@ test2 = path2
 test1.extend(test2)
 # Defining classifiers as variables and other useful variables
 sift = cv2.SIFT()
-k = 1000
+k = 3000
 
 #--------------------------------------------------------------------------
 #Detection and bag of visual words
