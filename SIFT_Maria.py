@@ -245,7 +245,7 @@ def Bhattacharyya(queryimage,db):
         count.append([amount,db[num][0]])
         amount=0
 
-    Result=sorted(count,key=itemgetter(0),reverse = False)
+    Result=sorted(count,key=itemgetter(0),reverse = True)
                      
     queryresult=[]
     for j in range(len(Result)):
