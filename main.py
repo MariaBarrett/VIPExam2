@@ -254,47 +254,10 @@ def Bhattacharyya(queryimage,db):
     return queryresult
 
 
-"""tfidf(an image,database)
+"""commonwords(a query image, database)
 
 
 """
-def tfidf(queryimage,db):
-
-    print "-"*60
-    print "Calculating the tf-idf."
-
-    tfidf=[]
-    queryresult=[]
-    for num in range(len(db)):
-            
-       tf=[]
-       idf=[]
-       words_amount=0
-       file_amount=0
-       tfidfvalue=0
-      
-       for i in range(k):#Caculate the amount of words in an image(from database)
-           words_amount+=db[num][1][i]
-          
-       for j in range(k):
-           tf.append(db[num][1][j]/words_amount)#Caculate tf, and append tf to the list named tf
-           for n in range(len(db)):
-              if db[n][1][j]!=0: file_amount+=1
-           idf.append(log(len(db)/(1+file_amount)))#Caculate idf, and append idf to the list named idf
-          
-       for x in range(len(tf)):
-           tfidfvalue+=tf[x]*idf[x]#Caculate the tf-idf
-         
-       
-       tfidf.append([tfidfvalue,db[num][0]])
-        
-    Result = sorted(tfidf, key=itemgetter(0))#Sort the images in the database according to the tf-idf value
-    
-    for i in range(len(Result)):
-        queryresult.append(Result[i][1])
-
-    return queryresult
-
 def commonwords(queryimage,db):
     Common=[]
     queryresult=[]
@@ -304,12 +267,14 @@ def commonwords(queryimage,db):
            if queryimage[1][i]!= 0 and db[num][1][i]!= 0:
                 count+=1
         Common.append([count,db[num][0]])#Caculate the amount of common words and append the result to the list named Common
-    Result=sorted(Common,key=itemgetter(0))#Sort the images according to the amount the common words
+    Result=sorted(Common,key=itemgetter(0),reverse=True)#Sort the images according to the amount the common words
                       
     for j in range(len(Result)):
         queryresult.append(Result[j][1])
 
     return queryresult
+
+
 
 """
  present_results(queryimage, resultpath, similarityfunction)
@@ -335,7 +300,7 @@ def present_results(queryimage, resultpath, similarityfunction):
 	print ('%s:' % similarityfunction)
 	print ('Precision rate in top 9: %s' %result)
 
-	imageplot=[]#used to store the matched images
+	imageplot=[]
 
 	for result in resultpath:
 	    img=np.array(Image.open(result))
@@ -345,7 +310,6 @@ def present_results(queryimage, resultpath, similarityfunction):
 	pl.imshow(np.array(Image.open(queryimage[0])))
 	pl.axis('off')
 	pl.show()
-
 
 	#plot the matched images
 	for i in range(9):
