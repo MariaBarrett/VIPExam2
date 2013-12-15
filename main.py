@@ -10,7 +10,6 @@ import numpy as np
 import glob
 import pylab as pl
 import ast
-import random
 import pickle
 
 # Extracting test and train set
@@ -23,11 +22,12 @@ path2 = glob.glob('../*/101_ObjectCategories/brontosaurus/*.jpg')
 
 train1 = path1[:30]
 train2 = path2[:30]
-train1.extend(train2) #One list only please!
+train1.extend(train2)
 
 test1 = path1
 test2 = path2
 test1.extend(test2)
+
 # Defining classifiers as variables and other useful variables
 sift = cv2.SIFT()
 k = 3000
@@ -166,7 +166,7 @@ def codebook_to_file(codebook):
 """
 codebook_from_file()
 This function retrieves the codebook from the file.
-It returns the codebook,
+It returns the codebook. 
 """
 
 def codebook_from_file():
@@ -206,18 +206,33 @@ def from_database():
 #Retrieval measures
 
 """userretrieval()
-
+This function prompts the user for an input, which it then tries to convert into a string.
+This function calls Bhattacharyya and commonwords on the user specified image.
+It then calls the output of those functions with present_results.
 """
 def userretrieval():
-	print "\nTo create a query, please select a value ranging from 0-85\n"
+	print "\nTo create a query, please select a value ranging from 0-83\n"
 	print "Lobster images are located between 0-41"
 	print "Brontosaurus images are located between 42-83"
 	print "-"*45,"\n"
-	uquery = int(raw_input("Choose an image: "))
 
+	passed = False
+	while passed is False:
+		try: 
+			uquery = int(raw_input("Choose an image: "))
+			passed = True
+		except ValueError:
+			print "Invalid input. Not a number."
+
+	inside = False
 	if uquery < 0 or uquery > 83:
 		print "Invalid input. Please try again"
-		query = int(raw_input("Choose an image: "))
+		while inside is False:
+			try:
+				query = int(raw_input("Choose an image: "))
+				inside = True
+			except ValueError:
+				print "Invalid input. Not a number"
 
 	db = from_database()
 	im = db[uquery]
@@ -240,8 +255,7 @@ def Bhattacharyya(queryimage,db):
     amount=0
     for num in range(len(db)):
         for i in range(k):
-           amount+=sqrt(queryimage[1][i]*db[num][1][i]) # You seem to loop over the dictionaries. But the order of the dictionary is a bit unstable and not the same for all images. It's safer to acces dict data by the key 
-       	# I know my math is not the best, but how does it make sense to sum up all values of sqrt(queryimage historgram * db histogram) into one value per db image and not use information about which keys(clusternumbers) have which values(which is counts, not probablities but  guess you know that?)?
+           amount+=sqrt(queryimage[1][i]*db[num][1][i])
         count.append([amount,db[num][0]])
         amount=0
 
@@ -254,9 +268,12 @@ def Bhattacharyya(queryimage,db):
     return queryresult
 
 
+
 """commonwords(a query image, database)
-
-
+This function takes an input of a single image and the database.
+It then compares the content of the query image to all the images in the database. 
+For every class/word that is in both inputs, it will add 1.
+It returns a list of integers ranging from 0-k, where k is most alike, with a lenght of the database.
 """
 def commonwords(queryimage,db):
     Common=[]
@@ -266,8 +283,8 @@ def commonwords(queryimage,db):
         for i in range(k):
            if queryimage[1][i]!= 0 and db[num][1][i]!= 0:
                 count+=1
-        Common.append([count,db[num][0]])#Caculate the amount of common words and append the result to the list named Common
-    Result=sorted(Common,key=itemgetter(0),reverse=True)#Sort the images according to the amount the common words
+        Common.append([count,db[num][0]])
+    Result=sorted(Common,key=itemgetter(0),reverse=True)#Descending
                       
     for j in range(len(Result)):
         queryresult.append(Result[j][1])
@@ -278,7 +295,7 @@ def commonwords(queryimage,db):
 
 """
  present_results(queryimage, resultpath, similarityfunction)
- This function takes the queryimage, the list of filenames for the 9 best matched images and the name of the similarity function
+ This function takes the queryimage, the list of filenames for the 9 best matched images and the name of the similarity function.
  It prints the precision rate and plots the queryimage and the matched images
 """   
 def present_results(queryimage, resultpath, similarityfunction):
@@ -347,8 +364,9 @@ def userinput():
 
 
 """commands(cmd)
-This function takes an input of 
-
+This function takes an integer as input.
+Depending on what integer is given, the function will either call createdatabase, userretrieval or SystemExit().
+When that function is done, it will call userinput() again.
 """
 def commands(cmd):
 	legal = ["1","2","3"]
